@@ -3,7 +3,11 @@
 
 ;; final_grades.clj -- Joey gibson <joey@joeygibson.com>
 ;; Solution for http://www.reddit.com/r/dailyprogrammer/comments/28gq9b/6182014_challenge_167_intermediate_final_grades/
-;; 
+;;
+;; To run:
+;; lein run -m dailyprogrammer.final-grades resources/final_grades.txt
+;;
+
 (defn get-data-from-file
   "Reads the data file, returning a vector of data for each line in the file."
   [file-name]
@@ -43,7 +47,7 @@
   [score letter]
   (let [perc (rem score 10)
         plus-or-minus (cond
-                        (<= perc 3) "-"
+                        (<= perc 2) "-"
                         (and (>= perc 7)
                              (not (= letter "A"))) "+"
                         :else "")]
@@ -90,4 +94,7 @@
   (doseq [record records]
     (println record)))
 
-(print-grades (process-grades "resources/final_grades.txt"))
+;; There is a test file at resources/final_grades.txt
+(defn -main
+  [& args]
+  (print-grades (process-grades (first args))))
