@@ -76,16 +76,14 @@
     (doseq [record records]
       (println record))))
 
-;; Sequences
-(def first-names (generate-random-name "resources/dist.male.first.txt" "resources/dist.female.first.txt"))
-(def last-names (generate-random-name "resources/dist.all.last.txt"))
-(def grades (repeatedly #(nth (range 50 101) (rand-int 50)))) ;; This needs some work
-
 (defn -main
   [& args]
   (if (< (count args) 1)
     (show-usage)
-    (let [num (Integer/parseInt (first args))
+    (let [first-names (generate-random-name "resources/dist.male.first.txt" "resources/dist.female.first.txt")
+          last-names (generate-random-name "resources/dist.all.last.txt")
+          grades (repeatedly #(nth (range 50 101) (rand-int 50)))
+          num (Integer/parseInt (first args))
           file-name (second args)
           students-and-grades (generate-and-format-students-and-grades first-names
                                                                        last-names grades num)]
