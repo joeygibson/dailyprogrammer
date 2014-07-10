@@ -82,5 +82,20 @@
       (> (count winning-group) 1) (format "Tie: %s" winning-names)
       :else (format "Winner: %s" winning-names))))
 
-(def data (get-data-from-file "resources/ch170-easy-input-1.txt"))
-(process-all-hands data)
+(defn -main
+  []
+  (let [files ["ch170-easy-input-1.txt"
+               "ch170-easy-input-2.txt"
+               "ch170-easy-input-chunes-1.txt"
+               "ch170-easy-input-chunes-2.txt"
+               "ch170-easy-input-chunes-3.txt"
+               "ch170-easy-input-chunes-4.txt"]]
+    (for [file files
+          :let [file-name (format "resources/%s" file)]]
+      (do (println file-name)
+          (println "---------------")
+          (println (process-all-hands (get-data-from-file file-name)))))))
+
+(-main)
+;(def data (get-data-from-file "resources/ch170-easy-input-1.txt"))
+;(process-all-hands data)
