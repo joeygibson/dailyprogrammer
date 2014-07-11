@@ -1,6 +1,14 @@
 (ns dailyprogrammer.ch170-easy-blackjack-checker
   (:require [clojure.string :as string]))
 
+;; ch170_easy_blackjack_checker.clj -- Joey gibson <joey@joeygibson.com>
+;; Solution for http://www.reddit.com/r/dailyprogrammer/comments/29zut0/772014_challenge_170_easy_blackjack_checker/
+;; which analyzes blackjack hands
+;;
+;; To run:
+;; lein run -m dailyprogrammer.ch170-easy-blackjack-checker
+;;
+
 (defn- get-data-from-file
   "Reads the data file, returning a vector of data for each line in the file."
   [file-name]
@@ -13,7 +21,7 @@
        :cards (map second matches)})))
 
 (defn- get-value-for-card-name
-  "Converts a textual name for a card into a numeric value. An ace returns a vector or 1 and 11"
+  "Converts a textual name for a card into a numeric value."
   [name]
   (condp = name
     "Ace" 1
@@ -31,11 +39,13 @@
     "King" 10))
 
 (defn- count-aces
+  "Simply counts the number of aces in the hand for later use"
   [cards]
   (let [aces (filter #(= % "Ace") cards)]
     (count aces)))
 
 (defn- remove-aces
+  "Return cards from the hand that are not aces"
   [cards]
   (filter #(not (= % "Ace")) cards))
 
@@ -57,45 +67,47 @@
         number-of-aces (- (count cards) (count aceless-cards))
         numeric-cards (map get-value-for-card-name aceless-cards)
         aceless-total (reduce + numeric-cards)
-        hand (+ aceless-total (choose-ace-value aceless-total number-of-aces))]
-    {:name name
-     :hand hand}))
+        hand (+ aceless-total (choose-ace-value aceless-total number-of-aces))
+        five-card-trick (and (<= hand 21)
+                             (= (count cards) 5))]
+    {:name            name
+     :hand            hand
+     :five-card-trick five-card-trick}))
 
 (defn- get-names-from-winning-group
+  "Return a comma-delimited list of the winners names."
   [group]
   (let [names (map :name group)]
     (string/join ", " names)))
 
 (defn- process-all-hands
-  "Compute the value of each player's hand, sort by that value, and determine the winner"
+  "Compute the value of each player's hand, sort by that value, and determine the winner(s)"
   [data]
   (let [hands (map compute-hand data)
         still-in (remove #(> (:hand %) 21) hands)
         sorted-hands (reverse (sort-by :hand still-in))
+        five-card-tricks (filter :five-card-trick still-in)
         groups (vals (group-by :hand sorted-hands))
-        winning-group (first groups)
+        winning-group (if-not (empty? five-card-tricks)
+                        five-card-tricks
+                        (first groups))
         winning-names (get-names-from-winning-group winning-group)]
-    (println "WG:" winning-group)
-    (println "WN:" winning-names)
     (cond
       (empty? winning-group) "Nobody wins"
       (> (count winning-group) 1) (format "Tie: %s" winning-names)
       :else (format "Winner: %s" winning-names))))
 
 (defn -main
-  []
+  [& args]
   (let [files ["ch170-easy-input-1.txt"
                "ch170-easy-input-2.txt"
                "ch170-easy-input-chunes-1.txt"
                "ch170-easy-input-chunes-2.txt"
                "ch170-easy-input-chunes-3.txt"
                "ch170-easy-input-chunes-4.txt"]]
-    (for [file files
-          :let [file-name (format "resources/%s" file)]]
-      (do (println file-name)
-          (println "---------------")
-          (println (process-all-hands (get-data-from-file file-name)))))))
+    (doseq [file files
+            :let [file-name (format "resources/%s" file)]]
+      (do (print file-name ": ")
+          (println (process-all-hands (get-data-from-file file-name)))
+          (println "---------------")))))
 
-(-main)
-;(def data (get-data-from-file "resources/ch170-easy-input-1.txt"))
-;(process-all-hands data)
